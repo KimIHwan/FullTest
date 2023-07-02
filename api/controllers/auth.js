@@ -1,5 +1,6 @@
 import {db} from "../db.js"
-import bcrypt from "bcryptjs";
+import bcrypt from "bcryptjs"
+import jwt from "jsonwebtoken"
 
 export const register = (req, res) => {
 
@@ -46,11 +47,20 @@ export const login = (req, res) => {
 
         if(!isPasswordCorrect) return res.status(400).json("아이디나 비밀번호가 일치하지 않습니다.")
 
+        const token = jwt.sign({id:data[0].id}, "jwtkey")
+        const {password, ...other} = data[0]
+
+        res.cookie("access_token", token, {
+            httpOnly:true
+        }).status(200).json(other)
 
     })
     
 }
 
 export const logout = (req, res) => {
-    
+    res.clearCookie("access_token", {
+        sameSite:"none",
+        secure:true
+    }).status(200).json("유저가 로그아웃 했습니다.")
 }
